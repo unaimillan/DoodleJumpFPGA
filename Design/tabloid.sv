@@ -40,43 +40,43 @@ always_ff @ (posedge clk)
 
 logic [11:0][12:0][2:0][3:0] zero_transparent_rgb;
 logic [11:0][12:0] zero_transparent_alpha;
-`INITIAL_ZERO_TRANSPARENT
+// `INITIAL_ZERO_TRANSPARENT
 
 logic [11:0][12:0][2:0][3:0] one_transparent_rgb;
 logic [11:0][12:0] one_transparent_alpha;
-`INITIAL_ONE_TRANSPARENT
+// `INITIAL_ONE_TRANSPARENT
 
 logic [11:0][12:0][2:0][3:0] two_transparent_rgb;
 logic [11:0][12:0] two_transparent_alpha;
-`INITIAL_TWO_TRANSPARENT
+// `INITIAL_TWO_TRANSPARENT
 
 logic [11:0][12:0][2:0][3:0] three_transparent_rgb;
 logic [11:0][12:0] three_transparent_alpha;
-`INITIAL_THREE_TRANSPARENT
+// `INITIAL_THREE_TRANSPARENT
 
 logic [11:0][12:0][2:0][3:0] four_transparent_rgb;
 logic [11:0][12:0] four_transparent_alpha;
-`INITIAL_FOUR_TRANSPARENT
+// `INITIAL_FOUR_TRANSPARENT
 
 logic [11:0][12:0][2:0][3:0] five_transparent_rgb;
 logic [11:0][12:0] five_transparent_alpha;
-`INITIAL_FIVE_TRANSPARENT
+// `INITIAL_FIVE_TRANSPARENT
 
 logic [11:0][12:0][2:0][3:0] six_transparent_rgb;
 logic [11:0][12:0] six_transparent_alpha;
-`INITIAL_SIX_TRANSPARENT
+// `INITIAL_SIX_TRANSPARENT
 
 logic [11:0][12:0][2:0][3:0] seven_transparent_rgb;
 logic [11:0][12:0] seven_transparent_alpha;
-`INITIAL_SEVEN_TRANSPARENT
+// `INITIAL_SEVEN_TRANSPARENT
 
 logic [11:0][12:0][2:0][3:0] eight_transparent_rgb;
 logic [11:0][12:0] eight_transparent_alpha;
-`INITIAL_EIGHT_TRANSPARENT
+// `INITIAL_EIGHT_TRANSPARENT
 
 logic [11:0][12:0][2:0][3:0] nine_transparent_rgb;
 logic [11:0][12:0] nine_transparent_alpha;
-`INITIAL_NINE_TRANSPARENT
+// `INITIAL_NINE_TRANSPARENT
 
 always_ff @ (posedge clk) begin
     is_transparent <= 1;

@@ -1,5 +1,5 @@
 from pathlib import Path
-from PIL import Image
+from PIL import Image, ImageFile
 
 
 PROJECT_DIR = Path('./')  # .resolve()
@@ -15,9 +15,73 @@ assert QUARTUS_SETTINGS_FILE is not None, f'Quartus settings file not found in "
 TEXTURES_DIR.mkdir(parents=True, exist_ok=True)
 
 
-def main():
-    print()
+def generate_sv_image(entity_name: str, image: ImageFile):
+    pixels = image.load()
+    entity_name_rgb = f'{entity_name}_rgb'
+    entity_name_alpha = f'{entity_name}_alpha'
+    macro_name = f'INITIAL_{entity_name.upper()}'
 
+    template_banner = (
+        f'// Module definition:\n'
+        f'// logic [{image.height-1}:0][{image.width-1}:0][2:0][3:0] {entity_name_rgb};\n'
+        f'// logic [{image.height-1}:0][{image.width-1}:0] {entity_name_alpha};'
+    )
+    template_header = (
+        f'`ifndef {macro_name}\n\n{template_banner}\n\n'
+        f'`define {macro_name} \\\nalways_comb begin \\'
+    )
+    template_footer = f'end\n\n`endif // {macro_name}\n'
+
+    # Construct template
+    file_lines = [template_header]
+    for y in range(image.height):
+        for x in range(image.width):
+            file_lines.append(
+                f"\t{entity_name_rgb}[{y}][{x}] = "
+                f"{{4'b{bin(pixels[x, y][2] // 17)[2:]}, "
+                f"4'b{bin(pixels[x, y][1] // 17)[2:]}, "
+                f"4'b{bin(pixels[x, y][0] // 17)[2:]}}}; \\"
+            )
+    
+    for y in range(image.height):
+        for x in range(image.width):
+            file_lines.append(
+                f"\t{entity_name_alpha}[{y}][{x}] "
+                f"= 1'b{int(not bool(pixels[x, y][3]))}; \\"
+            )
+
+    file_lines.append(template_footer)
+    return '\n'.join(file_lines)
+
+
+def generate_image_memory(image: ImageFile):
+    pixels = image.load()
+
+    # Construct template
+    file_rgb_lines = []
+    file_alpha_lines = []
+
+    for y in range(image.height):
+        for x in range(image.width):
+            file_rgb_lines.append(
+                f"{hex(pixels[x, y][2] // 17)[2:]}" +
+                f"{hex(pixels[x, y][1] // 17)[2:]}" +
+                f"{hex(pixels[x, y][0] // 17)[2:]}"
+            )
+    
+    for y in range(image.height):
+        for x in range(image.width):
+            file_alpha_lines.append(
+                str(int(not bool(pixels[x, y][3])))
+            )
+
+    return (
+        '\n'.join(file_rgb_lines),
+        '\n'.join(file_alpha_lines),        
+    )
+
+
+def main():
     for image_path in SPRITES_DIR.glob('*.png'):
         image_name_raw = image_path.stem
         image_name_components = image_name_raw.split(' ')
@@ -28,52 +92,33 @@ def main():
             continue
 
         entity_name = f'{image_name_components[0]}_{image_name_components[-1]}'
-        entity_name_rgb = f'{entity_name}_rgb'
-        entity_name_alpha = f'{entity_name}_alpha'
-        macro_name = f'INITIAL_{entity_name.upper()}'
         image_expected_width, image_expected_height = map(
             int, image_name_components[1].split('x'))
 
         image = Image.open(image_path)
-        pixels = image.load()
         assert image_expected_height == image.height
         assert image_expected_width == image.width
 
-        template_banner = (
-            f'// Module definition:\n'
-            f'// logic [{image.height-1}:0][{image.width-1}:0][2:0][3:0] {entity_name_rgb};\n'
-            f'// logic [{image.height-1}:0][{image.width-1}:0] {entity_name_alpha};'
-        )
-        template_header = (
-            f'`ifndef {macro_name}\n\n{template_banner}\n\n'
-            f'`define {macro_name} \\\nalways_comb begin \\'
-        )
-        template_footer = f'end\n\n`endif // {macro_name}\n'
 
-        # Construct template
-        file_lines = [template_header]
-        for y in range(image.height):
-            for x in range(image.width):
-                file_lines.append(
-                    f"\t{entity_name_rgb}[{y}][{x}] = "
-                    f"{{4'b{bin(pixels[x, y][2] // 17)[2:]}, "
-                    f"4'b{bin(pixels[x, y][1] // 17)[2:]}, "
-                    f"4'b{bin(pixels[x, y][0] // 17)[2:]}}}; \\"
-                )
-        
-        for y in range(image.height):
-            for x in range(image.width):
-                file_lines.append(
-                    f"\t{entity_name_alpha}[{y}][{x}] "
-                    f"= 1'b{int(not bool(pixels[x, y][3]))}; \\"
-                )
-        file_lines.append(template_footer)
+        GENERATE_TEXTURES_TO_SV = False
 
-        # Render filled template to the SystemVerilog file
-        target_path = TEXTURES_DIR / f'{entity_name}.sv'
-        target_path.write_text('\n'.join(file_lines))
+        if GENERATE_TEXTURES_TO_SV:
+            gen_content = generate_sv_image(entity_name, image)
 
-        update_quartus_settings_file(target_path)
+            # Render filled template to the SystemVerilog file
+            target_path = TEXTURES_DIR / f'{entity_name}.sv'
+            target_path.write_text(gen_content)
+
+            update_quartus_settings_file(target_path)
+
+        else:
+            gen_rgb_content, gen_alpha_content = generate_image_memory(image)
+
+            target_rbg_path = TEXTURES_DIR / f'{entity_name}_rbg.mem'
+            target_rbg_path.write_text(gen_rgb_content)
+            target_alpha_path = TEXTURES_DIR / f'{entity_name}_alpha.mem'
+            target_alpha_path.write_text(gen_alpha_content)
+
 
 
 def update_quartus_settings_file(generated_filepath: Path):

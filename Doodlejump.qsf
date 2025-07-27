@@ -36,21 +36,21 @@
 #
 # -------------------------------------------------------------------------- #
 
-
-set_global_assignment -name SYSTEMVERILOG_FILE Design/textures/one_transparent.sv
-set_global_assignment -name SYSTEMVERILOG_FILE Design/textures/zero_transparent.sv
-set_global_assignment -name SYSTEMVERILOG_FILE Design/textures/two_transparent.sv
-set_global_assignment -name SYSTEMVERILOG_FILE Design/textures/three_transparent.sv
-set_global_assignment -name SYSTEMVERILOG_FILE Design/textures/six_transparent.sv
-set_global_assignment -name SYSTEMVERILOG_FILE Design/textures/seven_transparent.sv
-set_global_assignment -name SYSTEMVERILOG_FILE Design/textures/nine_transparent.sv
-set_global_assignment -name SYSTEMVERILOG_FILE Design/textures/four_transparent.sv
-set_global_assignment -name SYSTEMVERILOG_FILE Design/textures/five_transparent.sv
-set_global_assignment -name SYSTEMVERILOG_FILE Design/textures/eight_transparent.sv
-set_global_assignment -name SYSTEMVERILOG_FILE Design/textures/signa_transparent.sv
-set_global_assignment -name SYSTEMVERILOG_FILE Design/textures/platform_green.sv
-set_global_assignment -name SYSTEMVERILOG_FILE Design/textures/doodle_right.sv
-set_global_assignment -name SYSTEMVERILOG_FILE Design/textures/doodle_left.sv
+set_global_assignment -name SEARCH_PATH .
+# set_global_assignment -name SYSTEMVERILOG_FILE Design/textures/one_transparent.sv
+# set_global_assignment -name SYSTEMVERILOG_FILE Design/textures/zero_transparent.sv
+# set_global_assignment -name SYSTEMVERILOG_FILE Design/textures/two_transparent.sv
+# set_global_assignment -name SYSTEMVERILOG_FILE Design/textures/three_transparent.sv
+# set_global_assignment -name SYSTEMVERILOG_FILE Design/textures/six_transparent.sv
+# set_global_assignment -name SYSTEMVERILOG_FILE Design/textures/seven_transparent.sv
+# set_global_assignment -name SYSTEMVERILOG_FILE Design/textures/nine_transparent.sv
+# set_global_assignment -name SYSTEMVERILOG_FILE Design/textures/four_transparent.sv
+# set_global_assignment -name SYSTEMVERILOG_FILE Design/textures/five_transparent.sv
+# set_global_assignment -name SYSTEMVERILOG_FILE Design/textures/eight_transparent.sv
+# set_global_assignment -name SYSTEMVERILOG_FILE Design/textures/signa_transparent.sv
+# set_global_assignment -name SYSTEMVERILOG_FILE Design/textures/platform_green.sv
+# set_global_assignment -name SYSTEMVERILOG_FILE Design/textures/doodle_right.sv
+# set_global_assignment -name SYSTEMVERILOG_FILE Design/textures/doodle_left.sv
 set_global_assignment -name FAMILY "MAX 10"
 set_global_assignment -name DEVICE 10M50DAF484C7G
 set_global_assignment -name TOP_LEVEL_ENTITY game

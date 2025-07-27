@@ -16,12 +16,16 @@ help:
 # Installation and generation
 # ------------------------------------------------------------------------------
 
-install:
+.venv:
 	python3 -m venv .venv
-	source .venv/bin/activate
-	pip3 install -r requirements.txt
 
-generate-sprites: install
+install: .venv
+	( \
+		. .venv/bin/activate \
+		&& pip3 install -r requirements.txt \
+	)
+
+generate-sprites:
 	python3 Scripts/generate_sprites.py
 
 # ------------------------------------------------------------------------------

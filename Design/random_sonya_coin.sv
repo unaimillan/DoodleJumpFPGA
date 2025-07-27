@@ -2,7 +2,7 @@ module random_sonya_coin(
 	input clk,
 	input rst,
 
-	output [14:0] corrected_fibonacci_LSFR
+	output logic [14:0] corrected_fibonacci_LSFR
 );
 
 logic [14:0][15:0] fibonacci_LSFR;
@@ -31,7 +31,7 @@ always_ff @ (posedge clk) begin
     end
 end
 
-wire [4:0][15:0] merged_fibonacci_LSFR;
+logic [4:0][15:0] merged_fibonacci_LSFR;
 always_comb begin
     corrected_fibonacci_LSFR = 15'b100000000000010;
     for (int i = 0; i < 5; i++) begin

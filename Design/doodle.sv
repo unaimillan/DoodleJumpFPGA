@@ -33,13 +33,22 @@ module doodle # (
 	output logic is_transparent
 );
 
-logic [79:0][79:0][2:0][3:0] doodle_left_rgb;
-logic [79:0][79:0] doodle_left_alpha;
-`INITIAL_DOODLE_LEFT
+localparam DOODLE_LEFT_HORZ_SIZE = 80;
+localparam DOODLE_LEFT_VERT_SIZE = 80;
 
-logic [79:0][79:0][2:0][3:0] doodle_right_rgb;
-logic [79:0][79:0] doodle_right_alpha;
-`INITIAL_DOODLE_RIGHT
+logic [2:0][3:0] doodle_left_rgb   [(DOODLE_LEFT_HORZ_SIZE * DOODLE_LEFT_VERT_SIZE) - 1 : 0];
+logic            doodle_left_alpha [(DOODLE_LEFT_HORZ_SIZE * DOODLE_LEFT_VERT_SIZE) - 1 : 0];
+// `INITIAL_DOODLE_LEFT
+
+initial $readmemh ("./Design/textures/doodle_left_rbg.mem",   doodle_left_rgb);
+initial $readmemb ("./Design/textures/doodle_left_alpha.mem", doodle_left_alpha);
+
+logic [2:0][3:0] doodle_right_rgb   [(DOODLE_LEFT_HORZ_SIZE * DOODLE_LEFT_VERT_SIZE) - 1 : 0];
+logic            doodle_right_alpha [(DOODLE_LEFT_HORZ_SIZE * DOODLE_LEFT_VERT_SIZE) - 1 : 0];
+// `INITIAL_DOODLE_RIGHT
+
+initial $readmemh ("./Design/textures/doodle_right_rbg.mem",   doodle_right_rgb);
+initial $readmemb ("./Design/textures/doodle_right_alpha.mem", doodle_right_alpha);
 
 // coloring
 wire draw = doodle_x <= beam_x && beam_x < doodle_x + WIDTH - 2
@@ -51,21 +60,21 @@ always_ff @ (posedge clk) begin
 	end else begin
 		if (draw) begin
 			if (delta_x < 0 || delta_x == 0 && previous_texture_direction) begin
-				previous_texture_direction = 1;
-				color[0] = doodle_left_rgb[beam_y - doodle_y][beam_x - doodle_x][0];
-				color[1] = doodle_left_rgb[beam_y - doodle_y][beam_x - doodle_x][1];
-				color[2] = doodle_left_rgb[beam_y - doodle_y][beam_x - doodle_x][2];
-				is_transparent = doodle_left_alpha[beam_y - doodle_y][beam_x - doodle_x];
+				previous_texture_direction <= 1;
+				color[0]       = doodle_left_rgb   [(beam_y - doodle_y)*DOODLE_LEFT_HORZ_SIZE + beam_x - doodle_x][0];
+				color[1]       = doodle_left_rgb   [(beam_y - doodle_y)*DOODLE_LEFT_HORZ_SIZE + beam_x - doodle_x][1];
+				color[2]       = doodle_left_rgb   [(beam_y - doodle_y)*DOODLE_LEFT_HORZ_SIZE + beam_x - doodle_x][2];
+				is_transparent = doodle_left_alpha [(beam_y - doodle_y)*DOODLE_LEFT_HORZ_SIZE + beam_x - doodle_x];
 			end else begin
-				previous_texture_direction = 0;
-				color[0] = doodle_right_rgb[beam_y - doodle_y][beam_x - doodle_x][0];
-				color[1] = doodle_right_rgb[beam_y - doodle_y][beam_x - doodle_x][1];
-				color[2] = doodle_right_rgb[beam_y - doodle_y][beam_x - doodle_x][2];
-				is_transparent = doodle_right_alpha[beam_y - doodle_y][beam_x - doodle_x];
+				previous_texture_direction <= 0;
+				color[0]       = doodle_right_rgb   [(beam_y - doodle_y)*DOODLE_LEFT_HORZ_SIZE + beam_x - doodle_x][0];
+				color[1]       = doodle_right_rgb   [(beam_y - doodle_y)*DOODLE_LEFT_HORZ_SIZE + beam_x - doodle_x][1];
+				color[2]       = doodle_right_rgb   [(beam_y - doodle_y)*DOODLE_LEFT_HORZ_SIZE + beam_x - doodle_x][2];
+				is_transparent = doodle_right_alpha [(beam_y - doodle_y)*DOODLE_LEFT_HORZ_SIZE + beam_x - doodle_x];
 			end
 		end else begin 
 			is_transparent = 1; 
-			previous_texture_direction = previous_texture_direction;
+			previous_texture_direction <= previous_texture_direction;
 		end
 	end
 end

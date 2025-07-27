@@ -14,7 +14,7 @@ module signa #(
 
 logic [281:0][229:0][2:0][3:0] signa_transparent_rgb;
 logic [281:0][229:0] signa_transparent_alpha;
-`INITIAL_SIGNA_TRANSPARENT
+// `INITIAL_SIGNA_TRANSPARENT
 
 always_ff @ (posedge clk) begin
 	if (game_state == 2

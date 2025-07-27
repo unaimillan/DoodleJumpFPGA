@@ -78,7 +78,7 @@ endgenerate
 
 logic [29:0][99:0][2:0][3:0] platform_green_rgb;
 logic [29:0][99:0] platform_green_alpha;
-`INITIAL_PLATFORM_GREEN
+// `INITIAL_PLATFORM_GREEN
 
 always_ff @(posedge clk) begin
 	for (int i = 0; i < 90; i++) begin
