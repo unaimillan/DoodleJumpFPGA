@@ -1,0 +1,97 @@
+.PHONY: install generate-sprites sim-gui sim-build sim-run sim-clean quartus synth upload
+
+VFLAGS = -O3 --x-assign fast --x-initial fast --noassert
+SDL_CFLAGS = `sdl2-config --cflags`
+SDL_LDFLAGS = `sdl2-config --libs`
+
+help:
+	$(info make help     - show this message(default))
+	$(info make simulate - delete synth folder)
+	$(info make quartus  - open project in Quartus Prime)
+	$(info make synth    - synthesize project in Quartus)
+	$(info make upload   - upload project to the FPGA board)
+	@true
+
+# ------------------------------------------------------------------------------
+# Installation and generation
+# ------------------------------------------------------------------------------
+
+install:
+	python3 -m venv .venv
+	source .venv/bin/activate
+	pip3 install -r requirements.txt
+
+generate-sprites: install
+	python3 Scripts/generate_sprites.py
+
+# ------------------------------------------------------------------------------
+# Simulation
+# ------------------------------------------------------------------------------
+
+VERILATOR_DIR := "./Simulation/Verilator"
+
+sim-gui: sim-clean sim-build sim-run
+
+sim-build: Design/game.sv
+	verilator ${VFLAGS} -IDesign -IDesign/textures -cc $< --exe $(VERILATOR_DIR)/simulate.cpp -o game.out \
+		-CFLAGS "${SDL_CFLAGS}" -LDFLAGS "${SDL_LDFLAGS}" --Mdir $(VERILATOR_DIR)/output_files \
+		--timescale 1ns/1ps -Wno-fatal # -Wno-MULTIDRIVEN -Wno-LATCH
+	make -C $(VERILATOR_DIR)/output_files -f Vgame.mk
+
+sim-run:
+	$(VERILATOR_DIR)/output_files/game.out
+
+sim-clean:
+	rm -rf $(VERILATOR_DIR)/output_files/
+
+# ------------------------------------------------------------------------------
+# Synthesis
+# ------------------------------------------------------------------------------
+
+CABLE_NAME   ?= "USB-Blaster"
+PROJECT_DIR  ?= .
+PROJECT_NAME ?= "Doodlejump"
+
+QUARTUS     := cd $(PROJECT_DIR) && quartus
+QUARTUS_SH  := cd $(PROJECT_DIR) && quartus_sh
+QUARTUS_PGM := cd $(PROJECT_DIR) && quartus_pgm
+
+# when we run quartus bins from WSL it can be installed on host W10
+# it this case we have to add .exe to the executed binary name
+ifdef WSL_DISTRO_NAME
+ ifeq (, $(shell which $(QUARTUS)))
+  QUARTUS     := $(QUARTUS).exe
+  QUARTUS_SH  := $(QUARTUS_SH).exe
+  QUARTUS_PGM := $(QUARTUS_PGM).exe
+ endif
+endif
+
+# make open
+#  cd project && quartus <projectname> &
+#     cd project            - go to project folder 
+#	  &&                    - if previous command was successfull
+#     quartus <projectname> - open <projectname> in quartus 
+#     &                     - run previous command in shell background
+quartus:
+	$(QUARTUS) $(PROJECT_NAME) &
+
+# make build
+#  cd project && quartus_sh --flow compile <projectname>
+#     cd project                              - go to project folder 
+#     &&                                      - if previous command was successfull
+#     quartus_sh --flow compile <projectname> - run quartus shell & perform basic compilation 
+#                                               of <projectname> project
+synth:
+	$(QUARTUS_SH) --no_banner --flow compile $(PROJECT_NAME)
+	make upload
+
+# make load
+#  cd project && quartus_pgm -c "USB-Blaster" -m JTAG -o "p;<projectname>.sof"
+#     cd project               - go to project folder 
+#	  &&                       - if previous command was successfull
+#     quartus_pgm              - launch quartus programmer
+#     -c "USB-Blaster"         - connect to "USB-Blaster" cable
+#     -m JTAG                  - in JTAG programming mode
+#     -o "p;<projectname>.sof" - program (configure) FPGA with <projectname>.sof file
+upload:
+	$(QUARTUS_PGM) --no_banner -c $(CABLE_NAME) -m JTAG -o "p;output_files/$(PROJECT_NAME).sof"
